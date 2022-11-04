@@ -24,7 +24,7 @@ class DiscordPersona {
                 ]
         });
         this.client.on("ready", () => {
-            console.info("Logged in Discord as " + this.client.user.tag);
+            console.info(`[${this.config}] Logged in Discord as ${this.client.user.tag}`);
         });
         this.client.on("messageCreate", async message => {
             // if it's its message ignore

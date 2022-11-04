@@ -5,7 +5,10 @@ const DiscordPersona = require("./persona");
 const personas = [];
 
 for (let file of fs.readdirSync("personas").filter(file => file.endsWith("json"))) {
+	console.info(`Loading ${file}`);
 	let config = JSON.parse(fs.readFileSync(`personas/${file}`, "utf8"));
-	config.name = file;
+	config.config = file;
 	personas.push(new DiscordPersona(config));
 }
+
+console.info(`${personas.length} personas loaded`);

@@ -1,26 +1,11 @@
-const Discord = require("discord.js");
 const fs = require("fs");
-require("dotenv").config();
+const DiscordPersona = require("./persona");
 
-var messageFrequence = parseFloat(process.env.MESSAGE_FREQUENCE);
-var EXPRESSIONS = JSON.parse(fs.readFileSync("expressions.json", "utf8"));
+/** @type DiscordPersona[] */
+const personas = [];
 
-const client = new Discord.Client({ intents:
-	[
-		Discord.GatewayIntentBits.Guilds,
-		Discord.GatewayIntentBits.GuildMessages,
-		Discord.GatewayIntentBits.MessageContent
-	]
-});
-
-client.on("ready", () => {
-	console.info("Logged in Discord as "+client.user.tag);
-});
-
-client.on("messageCreate", async message => {
-	if (message.author.id == client.user.id) return;
-	if (Math.random() > messageFrequence) return;
-	message.channel.send(EXPRESSIONS[Math.floor(EXPRESSIONS.length*Math.random())]);
-});
-
-client.login(process.env.DISCORD_BOT_TOKEN);
+for (let file of fs.readdirSync("personas").filter(file => file.endsWith("json"))) {
+	let config = JSON.parse(fs.readFileSync(`personas/${file}`, "utf8"));
+	config.name = file;
+	personas.push(new DiscordPersona(config));
+}

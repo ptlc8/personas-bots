@@ -1,5 +1,5 @@
 {
-  "name": "bloster-bot",
+  "name": "personas-bots",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,6 @@
   "author": "Ambi",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^14.0.2",
-    "dotenv": "^16.0.1"
+    "discord.js": "^14.0.2"
   }
 }

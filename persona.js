@@ -39,7 +39,7 @@ class DiscordPersona {
                 }
             }
             // else if it need to send expression
-            if (message.mentions.users.has(this.client.user.id) || Math.random() < messageFrequence)
+            if (message.mentions.users.has(this.client.user.id) || Math.random() < this.frequence)
                 message.channel.send(this.expressions[Math.floor(this.expressions.length * Math.random())]);
         });
         this.client.login(token);

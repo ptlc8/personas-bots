@@ -8,13 +8,15 @@ class DiscordPersona {
      * @param {number} param.frequence Message frequence
      * @param {string} param.config Configuration name
      */
-    constructor({ token, expressions, frequence, config }) {
+    constructor({ token, expressions, frequence, config, responses }) {
         /** @type {string[]} */
         this.expressions = expressions;
         /** @type {number} */
         this.frequence = frequence;
         /** @type {string} */
         this.config = config;
+        /** @type {Object.<string,string>} */
+        this.responses = responses;
         this.client = new Discord.Client({
             intents:
                 [
@@ -31,10 +33,17 @@ class DiscordPersona {
             if (message.author.id == this.client.user.id) return;
             // else if it's command
             if (message.content.split(" ")[0] == `<@${this.client.user.id}>`) {
-                console.log("command");
                 let result = this.command(message.content.replace(`<@${this.client.user.id}>`, "").trim());
                 if (result) {
                     message.channel.send(result);
+                    return;
+                }
+            }
+            // else if it can respond
+            for (let pattern in this.responses) {
+                var match = message.content.match(new RegExp(pattern, "i"));
+                if (match) {
+                    message.channel.send(format(this.responses[pattern], match));
                     return;
                 }
             }
@@ -50,25 +59,37 @@ class DiscordPersona {
      * @returns {?string}
      */
     command(message) {
-        console.log(message);
         switch (message.split(" ")[0]) {
             case "info":
                 let info = this.info();
-                return `J'ai ${info.expressions} expressions et je réponds à ${info.frequence * 100}% des messages (${info.config})`;
+                return `J'ai ${info.expressions} expressions, ${info.responses} répliques et je réponds à ${info.frequence * 100}% des messages (${info.config})`;
         }
         return null;
     }
     /**
      * Get info about the persona
-     * @returns {{tag: string, expressions: number, frequence: number, config: string}}
+     * @returns {{tag: string, expressions: number, frequence: number, config: string, responses: number}}
      */
     info() {
         return {
             tag: this.client.user.tag,
             expressions: this.expressions.length,
-            frequence: this.frequence
+            frequence: this.frequence,
+            config: this.config,
+            responses: Object.keys(this.responses).length
         };
     }
+}
+
+/**
+ * @param {string} str formating string
+ * @param {any[]} args arguments
+ * @returns {string} formated string
+ */
+function format(str, args) {
+    return str.replace(/{([0-9]+)}/g, function (match, index) {
+        return typeof args[index] == 'undefined' ? match : args[index];
+    });
 }
 
 module.exports = DiscordPersona;

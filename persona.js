@@ -16,7 +16,7 @@ class Persona {
         /** @type {Object.<string,string>} */
         this.responses = responses || {};
     }
-    onMessage(message, mentioned=false) {
+    onMessage(message, mentioned = false) {
         // if it can respond
         for (let pattern in this.responses) {
             var match = message.match(new RegExp(pattern, "i"));
@@ -29,11 +29,10 @@ class Persona {
     }
     /**
      * Get info about the persona
-     * @returns {{tag: string, expressions: number, frequence: number, config: string, responses: number}}
+     * @returns {{expressions: number, frequence: number, config: string, responses: number}}
      */
     info() {
         return {
-            tag: this.client.user.tag,
             expressions: this.expressions.length,
             frequence: this.frequence,
             config: this.config,

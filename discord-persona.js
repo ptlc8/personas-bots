@@ -5,12 +5,19 @@ class DiscordPersona {
     /**
      * @param {Object} param Also containing Persona parameters
      * @param {string} param.token Discord bot token
+     * @param {number?} param.delay Delay before response
+     * @param {number?} param.typingTime Time to type message
      * @see {@link Persona} Persona
      */
-    constructor({ token, expressions, frequence, config, responses }) {
+    constructor({ token, expressions, frequence, config, responses, delay, typingTime }) {
         /** @type {string} */
         this.config = config;
+        /** @type Persona */
         this.persona = new Persona({ expressions, frequence, config, responses });
+        /** @type number */
+        this.delay = delay || 0;
+        /** @type number */
+        this.typingTime = typingTime || 2000;
         this.client = new Discord.Client({
             intents:
                 [
@@ -35,8 +42,12 @@ class DiscordPersona {
             }
             // else let persona respond
             var response = this.persona.onMessage(message.content, message.mentions.users.has(this.client.user.id));
-            if (response)
-                message.channel.send(response);
+            if (response) {
+                setTimeout(() => {
+                    message.channel.sendTyping();
+                    setTimeout(() => message.channel.send(response), this.typingTime);
+                }, this.delay);
+            }
         });
         this.client.login(token);
     }

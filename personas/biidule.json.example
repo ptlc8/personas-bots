@@ -1,0 +1,10 @@
+{
+	"token": "MTAzOTk1ODU1Mzc2MDM4NzE3Mw.GiWsPq.8Zamu22vmkeBAogwk_CzR6E2o_fN-XohGXZ5Tw",
+	"frequence": "0",
+	"expressions": [
+		"?",
+		"Qui m'a ping ?"
+	],
+    "delay": 10000,
+	"typingTime": 1000
+}

@@ -1,12 +1,11 @@
 {
-	"token": "MTAzOTkwNjUxNDc0OTY0MDcyNA.G89ck6.w9rLrAbmBOi6XUzwQeunmfCMGbyDH_hK9R-2sA",
+	"token": "p1acE_Y0uR-ToK3n_heRe",
 	"frequence": "0.05",
 	"expressions": [
 		"Balarace sincèrement",
 		"Qui ?",
 		"Qui a demandé ?",
-		"ratio",
-		""
+		"ratio"
 	],
 	"responses": {
 		"Flo (.+)": "Et ce ratio {1} peut-être ?",

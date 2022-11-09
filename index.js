@@ -1,5 +1,5 @@
 const fs = require("fs");
-const DiscordPersona = require("./persona");
+const DiscordPersona = require("./discord-persona");
 
 /** @type DiscordPersona[] */
 const personas = [];

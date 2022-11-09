@@ -59,7 +59,7 @@ class DiscordPersona {
     command(message) {
         switch (message.split(" ")[0]) {
             case "info":
-                let info = this.info();
+                let info = this.persona.info();
                 return `J'ai ${info.expressions} expressions, ${info.responses} répliques et je réponds à ${info.frequence * 100}% des messages (${info.config})`;
         }
         return null;

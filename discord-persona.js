@@ -44,8 +44,7 @@ class DiscordPersona {
             // else let persona respond
             var response = this.persona.onMessage(message.content, message.mentions.users.has(this.client.user.id));
             if (response) {
-                replaceAsync(response, /:([a-zA-Z0-9_]+):/g, async (_match, emojiName) => {
-                    console.log(getEmoji(message.channel.guild, emojiName))
+                replaceAsync(response, /(?<!<):([a-zA-Z0-9_]+):(?![0-9])/g, async (_match, emojiName) => {
                     return await getEmoji(message.channel.guild, emojiName);
                 }).then(response => {
                     setTimeout(() => {

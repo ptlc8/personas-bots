@@ -13,14 +13,17 @@
 		},
 		{
 			"pattern": "Flo (.+)",
+			"frequence": 0.4,
 			"expression": "Et ce ratio {1} peut-être ?"
 		},
 		{
 			"pattern": "C'(.+[^?])",
+			"frequence": 0.4,
 			"expression": "Et ce ratio {1} peut-être ?"
 		},
 		{
 			"pattern": ".{200}",
+			"frequence": 1,
 			"expression": "Gépalu"
 		}
 	]

@@ -59,7 +59,7 @@ class Persona {
      */
     onMinute() {
         for (let routine of this.routines) {
-            if (!testBetween(routine.between) && (Math.random() > (routine.frequence || 0))) continue;
+            if (!testBetween(routine.between) || (Math.random() > (routine.frequence || 0))) continue;
             return routine.expressions ? pickRandom(routine.expressions) : routine.expression;
         }
     }
@@ -73,7 +73,7 @@ class Persona {
             responses: Object.keys(this.responses).length,
             routines: Object.keys(this.routines).length,
             expressions: [...this.responses, ...this.routines].reduce((n, r) => n + (r.expressions?.length || 1), 0),
-            frequence: this.responses.reduce((f, r) => r.pattern ? f : f + (1 - f) * (r.frequence || 1), 0)
+            frequence: this.responses.reduce((f, r) => r.pattern ? f : f + (1 - f) * (r.frequence || 0), 0)
         };
     }
 }

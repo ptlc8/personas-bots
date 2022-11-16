@@ -51,16 +51,18 @@ class DiscordPersona {
         setInterval(() => {
             var message = this.persona.onMinute();
             if (message) {
-                this.sendMessage(getRandomChannel(this.client), message);
+                this.sendMessage(getRandomChannel(this.client, channel => channel.send), message);
             }
         }, 60 * 1000);
     }
     /**
      * Send a message in a specific channel with typing
-     * @param {Discord.TextChannel} channel 
+     * @param {Discord.Channel} channel 
      * @param {string|String[]} message 
      */
     sendMessage(channel, message) {
+        if (!channel.send)
+            return;
         if (!channel.permissionsFor(channel.guild.members.me).has([Discord.PermissionFlagsBits.SendMessages, Discord.PermissionFlagsBits.ViewChannel]))
             return;
         if (message instanceof Array) {
@@ -119,11 +121,13 @@ function getEmoji(guild, emojiName) {
 
 /**
  * Gets a random channel from cache
- * @param {Discord.Client} client 
+ * @param {Discord.Client} client
+ * @param {((channel:Discord.Channel)=>boolean)?} filter 
  * @returns {Discord.Channel}
  */
-function getRandomChannel(client) {
-    return client.channels.cache.at(Math.random() * client.channels.cache.size);
+function getRandomChannel(client, filter = (c) => true) {
+    var channels = client.channels.cache.filter(filter);
+    return channels.at(Math.random() * channels.size);
 }
 
 /**

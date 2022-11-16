@@ -3,8 +3,8 @@
  * @type {object}
  * @property {string?} pattern pattern to match with previous message to send
  * @property {number?} frequence frequence between 0 and 1 of response
- * @property {string[]?} expressions array of possible expressions
- * @property {string?} expression only if one expression
+ * @property {string[]|string[][]?} expressions array of possible expressions
+ * @property {string|string[]?} expression only if one expression
  * @property {boolean} whenMention only use when mention
  * @property {string[]?} channels array of channel id allowed, default is all
  */
@@ -43,12 +43,14 @@ class Persona {
     onMessage(message, channel = undefined, mentioned = false) {
         for (let response of this.responses) {
             if (response.channels && !response.channels.includes(channel)) continue;
-            if (!(response.whenMention && mentioned) && (Math.random() > response.frequence)) continue;
+            if (!(response.whenMention && mentioned) && (Math.random() > (response.frequence || 0))) continue;
             var match = response.pattern
                 ? message.match(new RegExp(response.pattern, "i"))
                 : [message];
-            if (match)
-                return format(response.expressions ? pickRandom(response.expressions) : response.expression, match);
+            if (match) {
+                let expression = response.expressions ? pickRandom(response.expressions) : response.expression;
+                return expression instanceof Array ? expression.map(e => format(e, match)) : format(expression, match);
+            }
         }
     }
     /**
@@ -57,7 +59,7 @@ class Persona {
      */
     onMinute() {
         for (let routine of this.routines) {
-            if (!testBetween(routine.between) && (Math.random() > routine.frequence)) continue;
+            if (!testBetween(routine.between) && (Math.random() > (routine.frequence || 0))) continue;
             return routine.expressions ? pickRandom(routine.expressions) : routine.expression;
         }
     }

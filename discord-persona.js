@@ -58,11 +58,17 @@ class DiscordPersona {
     /**
      * Send a message in a specific channel with typing
      * @param {Discord.TextChannel} channel 
-     * @param {string} message 
+     * @param {string|String[]} message 
      */
     sendMessage(channel, message) {
         if (!channel.permissionsFor(channel.guild.members.me).has([Discord.PermissionFlagsBits.SendMessages, Discord.PermissionFlagsBits.ViewChannel]))
             return;
+        if (message instanceof Array) {
+            if (message.length == 0) return;
+            let remain = message.slice(1);
+            setTimeout(() => this.sendMessage(channel, remain), this.delay + this.typingTime + 100);
+            message = message[0];
+        }
         replaceAsync(message, /(?<!<):([a-zA-Z0-9_]+):(?![0-9])/g, async (_match, emojiName) => {
             return await getEmoji(channel.guild, emojiName);
         }).then(message => {

@@ -1,31 +1,65 @@
+/**
+ * @typedef Response
+ * @type {object}
+ * @property {string?} pattern pattern to match with previous message to send
+ * @property {number?} frequence frequence between 0 and 1 of response
+ * @property {string[]?} expressions array of possible expressions
+ * @property {string?} expression only if one expression
+ * @property {boolean} whenMention only use when mention
+ * @property {string[]?} channels array of channel id allowed, default is all
+ */
+
+/**
+ * @typedef Routine
+ * @type {object}
+ * @property {[string,string]?} between two time between routine can be sent, example : ["10:00", "18:00"]
+ * @property {number?} frequence probability of it being sent every minute
+ * @property {string[]?} expressions array of possible expressions
+ * @property {string?} expression only if one expression
+ */
+
 class Persona {
     /**
      * @param {Object} param
-     * @param {string[]?} param.expressions Array of sentences
-     * @param {number?} param.frequence Message frequence
-     * @param {string?} param.config Configuration name
-     * @param {Object.<string,string>?} param.responses Regex and associated responses
+     * @param {string?} param.config configuration name
+     * @param {Response[]} param.responses possible responses
+     * @param {Routine[]} param.routines possible routines
      */
-    constructor({ expressions, frequence, config, responses }) {
-        /** @type {string[]} */
-        this.expressions = expressions || [];
-        /** @type {number} */
-        this.frequence = frequence || 0;
+    constructor({ config, responses, routines }) {
         /** @type {string?} */
         this.config = config;
-        /** @type {Object.<string,string>} */
-        this.responses = responses || {};
+        /** @type {Response[]} */
+        this.responses = responses || [];
+        /** @type {Routine[]} */
+        this.routines = routines || [];
     }
-    onMessage(message, mentioned = false) {
-        // if it can respond
-        for (let pattern in this.responses) {
-            var match = message.match(new RegExp(pattern, "i"));
+    /**
+     * Inform the persona that a message was received
+     * @param {string} message content of the message received
+     * @param {string} channel channel name or identifier
+     * @param {boolean} mentioned true if the persona was mentioned
+     * @returns {string?} response of the persona
+     */
+    onMessage(message, channel = undefined, mentioned = false) {
+        for (let response of this.responses) {
+            if (response.channels && !response.channels.includes(channel)) continue;
+            if (!(response.whenMention && mentioned) && (Math.random() > response.frequence)) continue;
+            var match = response.pattern
+                ? message.match(new RegExp(response.pattern, "i"))
+                : [message];
             if (match)
-                return format(this.responses[pattern], match);
+                return format(response.expressions ? pickRandom(response.expressions) : response.expression, match);
         }
-        // else if it need to send expression
-        if (mentioned || Math.random() < this.frequence)
-            return this.expressions[Math.floor(this.expressions.length * Math.random())];
+    }
+    /**
+     * Inform the persona that a minute has passed
+     * @returns {string?} message the persona would send
+     */
+    onMinute() {
+        for (let routine of this.routines) {
+            if (!testBetween(routine.between) && (Math.random() > routine.frequence)) continue;
+            return routine.expressions ? pickRandom(routine.expressions) : routine.expression;
+        }
     }
     /**
      * Get info about the persona
@@ -33,23 +67,46 @@ class Persona {
      */
     info() {
         return {
-            expressions: this.expressions.length,
-            frequence: this.frequence,
             config: this.config,
-            responses: Object.keys(this.responses).length
+            responses: Object.keys(this.responses).length,
+            routines: Object.keys(this.routines).length,
+            expressions: [...this.responses, ...this.routines].reduce((n, r) => n + (r.expressions?.length || 1), 0),
+            frequence: this.responses.reduce((f, r) => r.pattern ? f : f + (1 - f) * (r.frequence || 1), 0)
         };
     }
 }
 
 /**
  * @param {string} str formating string
- * @param {any[]} args arguments
+ * @param {string[]} args arguments
  * @returns {string} formated string
  */
 function format(str, args) {
     return str.replace(/{([0-9]+)}/g, function (match, index) {
         return typeof args[index] == 'undefined' ? match : args[index];
     });
+}
+
+/**
+ * @template T
+ * @param {T[]} arr
+ * @returns {T}
+ */
+function pickRandom(arr) {
+    return arr[Math.floor(arr.length * Math.random())];
+}
+
+/**
+ * Test if actual time is between interval
+ * @param {[string,string]} interval two time between routine can be sent, example : ["10:00", "18:00"]
+ * @returns {boolean} 
+ */
+function testBetween(interval) {
+    if (!interval) return true;
+    var now = new Date().getHours() * 60 + new Date().getMinutes();
+    var time1 = Number(interval[0].split(":")[0] || 0) * 60 + Number(interval[0].split(":")[1] || 0);
+    var time2 = Number(interval[1].split(":")[0] || 0) * 60 + Number(interval[1].split(":")[1] || 0);
+    return time1 < time2 ? (time1 <= now && now < time2) : (time1 < now || now < time2);
 }
 
 module.exports = Persona;

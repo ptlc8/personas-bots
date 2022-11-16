@@ -1,9 +1,14 @@
 {
 	"token": "p1acE_Y0uR-ToK3n_heRe",
-	"frequence": "0",
-	"expressions": [
-		"?",
-		"Qui m'a ping ?"
+	"responses": [
+		{
+			"frequence": 0,
+			"whenMention": true,
+			"expressions": [
+				"?",
+				"Qui m'a ping ?"
+			]
+		}
 	],
     "delay": 10000,
 	"typingTime": 1000

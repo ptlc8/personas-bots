@@ -1,0 +1,49 @@
+{
+    "token": "p1acE_Y0uR-ToK3n_heRe",
+    "responses": [
+        {
+            "frequence": "0.1",
+            "whenMention": true,
+            "expressions": [
+                "golem",
+                "not ready",
+                "naturelle",
+                "selection",
+                "ahiii",
+                "sans vergogne",
+                "finito",
+                "toutes",
+                "ouin ouin",
+                "OUUHHHHHHHH",
+                "preuve ?",
+                "woman",
+                "BeXus :sosad:",
+                ":AAAAAH:"
+            ]
+        }
+    ],
+    "routines": [
+        {
+            "between": [
+                "8:00",
+                "0:00"
+            ],
+            "frequence": 0.001,
+            "expressions": [
+                "pourquoi personne parle ?",
+                "PARLEZ"
+            ]
+        },
+        {
+            "between": [
+                "22:00",
+                "23:00"
+            ],
+            "frequence": 0.005,
+            "expressions": [
+                "voc ?",
+                "Hollow Knight ?"
+            ]
+        }
+    ]
+}

@@ -9,11 +9,11 @@ class DiscordPersona {
      * @param {number?} param.typingTime Time to type message
      * @see {@link Persona} Persona
      */
-    constructor({ token, expressions, frequence, config, responses, delay, typingTime }) {
+    constructor({ token, config, responses, routines, delay, typingTime }) {
         /** @type {string} */
         this.config = config;
         /** @type Persona */
-        this.persona = new Persona({ expressions, frequence, config, responses });
+        this.persona = new Persona({ config, responses, routines });
         /** @type number */
         this.delay = delay || 0;
         /** @type number */
@@ -42,19 +42,35 @@ class DiscordPersona {
                 }
             }
             // else let persona respond
-            var response = this.persona.onMessage(message.content, message.mentions.users.has(this.client.user.id));
+            var response = this.persona.onMessage(message.content, message.channel.id, message.mentions.users.has(this.client.user.id));
             if (response) {
-                replaceAsync(response, /(?<!<):([a-zA-Z0-9_]+):(?![0-9])/g, async (_match, emojiName) => {
-                    return await getEmoji(message.channel.guild, emojiName);
-                }).then(response => {
-                    setTimeout(() => {
-                        message.channel.sendTyping();
-                        setTimeout(() => message.channel.send(response), this.typingTime);
-                    }, this.delay);
-                });
+                this.sendMessage(message.channel, response);
             }
         });
         this.client.login(token);
+        setInterval(() => {
+            var message = this.persona.onMinute();
+            if (message) {
+                this.sendMessage(getRandomChannel(this.client), message);
+            }
+        }, 60 * 1000);
+    }
+    /**
+     * Send a message in a specific channel with typing
+     * @param {Discord.TextChannel} channel 
+     * @param {string} message 
+     */
+    sendMessage(channel, message) {
+        if (!channel.permissionsFor(channel.guild.members.me).has([Discord.PermissionFlagsBits.SendMessages, Discord.PermissionFlagsBits.ViewChannel]))
+            return;
+        replaceAsync(message, /(?<!<):([a-zA-Z0-9_]+):(?![0-9])/g, async (_match, emojiName) => {
+            return await getEmoji(channel.guild, emojiName);
+        }).then(message => {
+            setTimeout(() => {
+                channel.sendTyping();
+                setTimeout(() => channel.send(message), this.typingTime);
+            }, this.delay);
+        });
     }
     /**
      * Get result of a command
@@ -65,7 +81,7 @@ class DiscordPersona {
         switch (message.split(" ")[0]) {
             case "info":
                 let info = this.persona.info();
-                return `J'ai ${info.expressions} expressions, ${info.responses} répliques et je réponds à ${info.frequence * 100}% des messages (${info.config})`;
+                return `J'ai ${info.responses} répliques, ${info.routines} routines, ${info.expressions} expressions et je réponds en moyenne à ${info.frequence * 100}% des messages (${info.config})`;
         }
         return null;
     }
@@ -93,6 +109,15 @@ function getEmoji(guild, emojiName) {
             resolve(emoji ? `<:${emoji.name}:${emoji.id}>` : emojiName);
         }
     });
+}
+
+/**
+ * Gets a random channel from cache
+ * @param {Discord.Client} client 
+ * @returns {Discord.Channel}
+ */
+function getRandomChannel(client) {
+    return client.channels.cache.at(Math.random() * client.channels.cache.size);
 }
 
 /**

@@ -1,14 +1,27 @@
 {
 	"token": "p1acE_Y0uR-ToK3n_heRe",
-	"frequence": "0.05",
-	"expressions": [
-		"Balarace sincèrement",
-		"Qui ?",
-		"Qui a demandé ?",
-		"ratio"
-	],
-	"responses": {
-		"Flo (.+)": "Et ce ratio {1} peut-être ?",
-		"C'(.+[^?])": "Et ce ratio {1} peut-être ?"
-	}
+	"responses": [
+		{
+			"frequence": "0.05",
+			"whenMention": true,
+			"expressions": [
+				"Balarace sincèrement",
+				"Qui ?",
+				"Qui a demandé ?",
+				"ratio"
+			]
+		},
+		{
+			"pattern": "Flo (.+)",
+			"expression": "Et ce ratio {1} peut-être ?"
+		},
+		{
+			"pattern": "C'(.+[^?])",
+			"expression": "Et ce ratio {1} peut-être ?"
+		},
+		{
+			"pattern": ".{200}",
+			"expression": "Gépalu"
+		}
+	]
 }

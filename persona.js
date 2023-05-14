@@ -16,31 +16,42 @@
  * @property {number?} frequence probability of it being sent every minute
  * @property {string[]?} expressions array of possible expressions
  * @property {string?} expression only if one expression
+ * @property {string[]?} channels array of channel id allowed, default is all
+ */
+
+/**
+ * @typedef Config
+ * @type {object}
+ * @property {string?} config configuration name
+ * @property {Response[]?} responses possible responses
+ * @property {Routine[]?} routines possible routines
+ * @property {string[]?} ignoreChannels channels names patterns to ignore
  */
 
 class Persona {
     /**
-     * @param {Object} param
-     * @param {string?} param.config configuration name
-     * @param {Response[]} param.responses possible responses
-     * @param {Routine[]} param.routines possible routines
+     * @param {Config} config
      */
-    constructor({ config, responses, routines }) {
+    constructor({ config, responses, routines, ignoreChannels }) {
         /** @type {string?} */
         this.config = config;
         /** @type {Response[]} */
         this.responses = responses || [];
         /** @type {Routine[]} */
         this.routines = routines || [];
+        /** @type {string[]} */
+        this.ignoreChannels = ignoreChannels || [];
     }
     /**
      * Inform the persona that a message was received
      * @param {string} message content of the message received
      * @param {string} channel channel name or identifier
      * @param {boolean} mentioned true if the persona was mentioned
-     * @returns {string?} response of the persona
+     * @returns {(string|string[])?} response of the persona
      */
     onMessage(message, channel = undefined, mentioned = false) {
+        if (!filterChannels([channel], this.ignoreChannels)[0])
+            return;
         for (let response of this.responses) {
             if (response.channels && !response.channels.includes(channel)) continue;
             if (!(response.whenMention && mentioned) && (Math.random() > (response.frequence || 0))) continue;
@@ -55,12 +66,16 @@ class Persona {
     }
     /**
      * Inform the persona that a minute has passed
-     * @returns {string?} message the persona would send
+     * @param {string[]} channels list of channels names or identifiers
+     * @returns {{message: string | string[], channel: string?}} message the persona would send
      */
-    onMinute() {
+    onMinute(channels) {
         for (let routine of this.routines) {
             if (!testBetween(routine.between) || (Math.random() > (routine.frequence || 0))) continue;
-            return routine.expressions ? pickRandom(routine.expressions) : routine.expression;
+            return {
+                message: routine.expressions ? pickRandom(routine.expressions) : routine.expression,
+                channel: pickRandom(filterChannels(channels, this.ignoreChannels, routine.channels))
+            };
         }
     }
     /**
@@ -109,6 +124,26 @@ function testBetween(interval) {
     var time1 = Number(interval[0].split(":")[0] || 0) * 60 + Number(interval[0].split(":")[1] || 0);
     var time2 = Number(interval[1].split(":")[0] || 0) * 60 + Number(interval[1].split(":")[1] || 0);
     return time1 < time2 ? (time1 <= now && now < time2) : (time1 < now || now < time2);
+}
+
+/**
+ * Filter channels
+ * @param {string[]} channels 
+ * @param {string[]} ignorePatterns ignoring patterns
+ * @param {string[]} patterns inclusion patterns, if undefined, all channels are included
+ * @returns {string[]} filtered channels
+ */
+function filterChannels(channels, ignorePatterns, patterns=undefined) {
+    return channels.filter(channel => {
+        for (let iPattern of ignorePatterns)
+            if (channel.match(new RegExp(iPattern, "i")))
+                return false;
+        if (!patterns) return true;
+        for (let pattern of patterns)
+            if (channel.match(new RegExp(pattern, "i")))
+                return true;
+        return false;
+    });
 }
 
 module.exports = Persona;

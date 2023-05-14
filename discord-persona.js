@@ -1,19 +1,28 @@
 const Discord = require("discord.js");
 const Persona = require("./persona");
 
+/**
+ * @typedef {Persona.Config} Config
+ * @property {string} token Discord bot token
+ * @property {number?} delay Delay before response
+ * @property {number?} typingTime Time to type message
+ */
+
+/**
+ * Persona for Discord
+ * @see {@link Persona} Persona
+ * @see {@link https://discord.js.org/#/docs/main/stable/class/Client} Discord.Client
+ */
 class DiscordPersona {
     /**
-     * @param {Object} param Also containing Persona parameters
-     * @param {string} param.token Discord bot token
-     * @param {number?} param.delay Delay before response
-     * @param {number?} param.typingTime Time to type message
+     * @param {Config} config Also containing Persona parameters
      * @see {@link Persona} Persona
      */
-    constructor({ token, config, responses, routines, delay, typingTime }) {
+    constructor({ token, config, responses, routines, delay, typingTime, ignoreChannels }) {
         /** @type {string} */
         this.config = config;
         /** @type Persona */
-        this.persona = new Persona({ config, responses, routines });
+        this.persona = new Persona({ config, responses, routines, ignoreChannels });
         /** @type number */
         this.delay = delay || 0;
         /** @type number */
@@ -42,16 +51,17 @@ class DiscordPersona {
                 }
             }
             // else let persona respond
-            var response = this.persona.onMessage(message.content, message.channel.id, message.mentions.users.has(this.client.user.id));
+            var response = this.persona.onMessage(message.content, message.channel.name, message.mentions.users.has(this.client.user.id));
             if (response) {
                 this.sendMessage(message.channel, response);
             }
         });
         this.client.login(token);
         setInterval(() => {
-            var message = this.persona.onMinute();
-            if (message) {
-                this.sendMessage(getRandomChannel(this.client, channel => channel.send), message);
+            var action = this.persona.onMinute(this.client.channels.cache.filter(channel => channel.send).map(channel => channel.name));
+            if (!action) return;
+            if (action.message && action.channel) {
+                this.sendMessage(this.client.channels.cache.find(channel => channel.name == action.channel), action.message);
             }
         }, 60 * 1000);
     }
@@ -68,7 +78,7 @@ class DiscordPersona {
         if (message instanceof Array) {
             if (message.length == 0) return;
             let remain = message.slice(1);
-            setTimeout(() => this.sendMessage(channel, remain), this.delay + this.typingTime + 100);
+            setTimeout(() => this.sendMessage(channel, remain), randomize(this.delay, 20) + randomize(this.typingTime, 10) + 100);
             message = message[0];
         }
         replaceAsync(message, /(?<!<):([a-zA-Z0-9_]+):(?![0-9])/g, async (_match, emojiName) => {
@@ -76,8 +86,8 @@ class DiscordPersona {
         }).then(message => {
             setTimeout(() => {
                 channel.sendTyping();
-                setTimeout(() => channel.send(message), this.typingTime);
-            }, this.delay);
+                setTimeout(() => channel.send(message), randomize(this.typingTime, 30));
+            }, randomize(this.delay, 60));
         });
     }
     /**
@@ -120,17 +130,6 @@ function getEmoji(guild, emojiName) {
 }
 
 /**
- * Gets a random channel from cache
- * @param {Discord.Client} client
- * @param {((channel:Discord.Channel)=>boolean)?} filter 
- * @returns {Discord.Channel}
- */
-function getRandomChannel(client, filter = (c) => true) {
-    var channels = client.channels.cache.filter(filter);
-    return channels.at(Math.random() * channels.size);
-}
-
-/**
  * String.replace function but for async function
  * @see {@link String.replace}
  * @param {string} str 
@@ -146,6 +145,15 @@ async function replaceAsync(str, regex, asyncFn) {
     });
     const data = await Promise.all(promises);
     return str.replace(regex, () => data.shift());
+}
+
+/** Add or remove % of the value
+ * @param {number} value
+ * @param {number} percent
+ * @returns {number}
+ */
+function randomize(value, percent) {
+    return value * (1 + (Math.random() - 0.5) * percent / 50);
 }
 
 module.exports = DiscordPersona;

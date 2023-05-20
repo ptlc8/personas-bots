@@ -78,7 +78,7 @@ class DiscordPersona {
         if (message instanceof Array) {
             if (message.length == 0) return;
             let remain = message.slice(1);
-            setTimeout(() => this.sendMessage(channel, remain), randomize(this.delay, 20) + randomize(this.typingTime, 10) + 100);
+            setTimeout(() => this.sendMessage(channel, remain), randomize(this.delay / 2, 20) + randomize(this.typingTime, 10) + 100);
             message = message[0];
         }
         replaceAsync(message, /(?<!<):([a-zA-Z0-9_]+):(?![0-9])/g, async (_match, emojiName) => {

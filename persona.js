@@ -133,7 +133,7 @@ function testBetween(interval) {
  * @param {string[]} patterns inclusion patterns, if undefined, all channels are included
  * @returns {string[]} filtered channels
  */
-function filterChannels(channels, ignorePatterns, patterns=undefined) {
+function filterChannels(channels, ignorePatterns, patterns = undefined) {
     return channels.filter(channel => {
         for (let iPattern of ignorePatterns)
             if (channel.match(new RegExp(iPattern, "i")))

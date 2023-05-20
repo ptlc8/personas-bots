@@ -33,9 +33,9 @@ for (let file of fs.readdirSync("personas").filter(file => file.endsWith("json")
 	let config = JSON.parse(fs.readFileSync(`personas/${file}`, "utf8"));
 	config.ignoreChannels = (config.ignoreChannels ?? []).concat(globalConfig.ignoreChannels ?? []);
 	for (let r of config.responses ?? [])
-		r.frequence *= globalConfig.frequenceFactor ?? 1;
+		r.frequence = 1 - Math.pow(1 - r.frequence, globalConfig.frequenceFactor) ?? 1;
 	for (let r of config.routines ?? [])
-		r.frequence *= globalConfig.frequenceFactor ?? 1;
+		r.frequence = 1 - Math.pow(1 - r.frequence, globalConfig.frequenceFactor) ?? 1;
 	config.delay = (config.delay ?? 0) * (globalConfig.delayFactor ?? 1) + (globalConfig.delayAddional ?? 0);
 	config.typingTime = (config.typingTime ?? 2000) * (globalConfig.typingTimeFactor ?? 1) + (globalConfig.typingTimeAddional ?? 0);
 	config.config = file;

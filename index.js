@@ -11,7 +11,8 @@ var globalConfig = {
 	delayAddional: 0,
 	delayFactor: 1,
 	typingTimeFactor: 1,
-	typingTimeAddional: 0
+	typingTimeAddional: 0,
+	timeZone: null
 };
 if (fs.existsSync("config.json")) {
 	var json = fs.readFileSync("config.json", "utf8");
@@ -26,6 +27,9 @@ if (fs.existsSync("config.json")) {
 } else {
 	fs.writeFileSync("config.json", JSON.stringify(globalConfig, null, 4));
 }
+
+if (globalConfig.timeZone)
+	process.env.TZ = globalConfig.timeZone;
 
 for (let file of fs.readdirSync("personas").filter(file => file.endsWith("json"))) {
 	console.info(`Loading ${file}`);

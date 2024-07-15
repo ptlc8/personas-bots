@@ -2,7 +2,6 @@
 	"token": "p1acE_Y0uR-ToK3n_heRe",
 	"responses": [
 		{
-			"frequence": 0,
 			"whenMention": true,
 			"expressions": [
 				"?",
@@ -10,6 +9,6 @@
 			]
 		}
 	],
-    "delay": 10000,
+	"delay": 10000,
 	"typingTime": 1000
 }

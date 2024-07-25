@@ -137,6 +137,7 @@ function filterChannels(channels, ignorePatterns, patterns = []) {
         for (let iPattern of ignorePatterns)
             if (channel.match(new RegExp(iPattern, "i")))
                 return false;
+        if (patterns.length == 0) return true;
         for (let pattern of patterns)
             if (channel.match(new RegExp(pattern, "i")))
                 return true;

@@ -31,7 +31,11 @@ pipeline {
 
         stage('Restart') {
             steps {
-                sh "cd ${params.deploy_dir}; npm run screen:restart || npm run screen:start"
+                sh """
+                    export JENKINS_NODE_COOKIE=dontKillMe
+                    cd ${params.deploy_dir}
+                    npm run screen:restart || npm run screen:start
+                """
             }
         }
     }

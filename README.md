@@ -10,11 +10,11 @@ Just a program managing Discord bots speaking with specific expressions
 ## Setup
 
 - create one or many discord bot at https://discord.com/developers
-- create a `*.json` file in the [personas](personas) directory, following the examples
-[\[1\]](personas/bloster.json.example)
-[\[2\]](personas/biidule.json.example)
-[\[3\]](personas/ns10.json.example)
-[\[4\]](personas/hatem.json.example)
+- create a `*.json` file in the [data/personas](data/personas) directory, following the examples
+[\[1\]](data/personas/bloster.json.example)
+[\[2\]](data/personas/biidule.json.example)
+[\[3\]](data/personas/ns10.json.example)
+[\[4\]](data/personas/hatem.json.example)
 - run `npm install`
 - run `npm start`
 

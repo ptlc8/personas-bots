@@ -1,0 +1,15 @@
+{
+    "ignoreChannels": [
+        "g[ée]n[ée]ral",
+        "yons",
+        "cours",
+        "citation",
+        "^(?!.*spam).*$"
+    ],
+    "frequenceFactor": 2,
+    "delayAddional": 2000,
+    "delayFactor": 1,
+    "typingTimeAddional": 1000,
+    "typingTimeFactor": 1,
+    "timeZone": "Europe/Paris"
+}

@@ -26,27 +26,30 @@ var globalConfig = {
 	timeZone: null
 };
 
-if (fs.existsSync("config.json")) {
-	var json = fs.readFileSync("config.json", "utf8");
+var configFile = "data/config.json";
+if (fs.existsSync(configFile)) {
+	var json = fs.readFileSync(configFile, "utf8");
 	try {
 		globalConfig = JSON.parse(json);
 	} catch (/** @type {any} */ e) {
-		console.error("Error parsing config.json: fix or delete it");
+		console.error(`Error parsing config file: fix or delete it (${configFile})`);
 		console.error("\t " + e.message);
 		process.exit(1);
 	}
-	console.info("Loaded config.json");
+	console.info('Config file loaded');
 } else {
-	fs.writeFileSync("config.json", JSON.stringify(globalConfig, null, 4));
+	fs.writeFileSync(configFile, JSON.stringify(globalConfig, null, 4));
+	console.info("Config file created");
 }
 
 if (globalConfig.timeZone)
 	process.env.TZ = globalConfig.timeZone;
 
-for (let file of fs.readdirSync("personas").filter(file => file.endsWith("json"))) {
+var personasFolder = "data/personas";
+for (let file of fs.readdirSync(personasFolder).filter(file => file.endsWith("json"))) {
 	console.info(`Loading ${file}`);
 	/** @type {DiscordPersona.Config} */
-	let config = JSON.parse(fs.readFileSync(`personas/${file}`, "utf8"));
+	let config = JSON.parse(fs.readFileSync(`${personasFolder}/${file}`, "utf8"));
 	config.ignoreChannels = (config.ignoreChannels ?? []).concat(globalConfig.ignoreChannels ?? []);
 	for (let r of config.responses ?? [])
 		r.frequence = 1 - Math.pow(1 - (r.frequence ?? 0), globalConfig.frequenceFactor ?? 1);

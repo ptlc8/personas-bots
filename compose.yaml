@@ -1,0 +1,6 @@
+services:
+  personas-bots:
+    build: .
+    restart: always
+    volumes:
+      - ${DATA_FOLDER}${DATA_FOLDER:+:}/app/data

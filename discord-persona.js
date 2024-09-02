@@ -63,7 +63,9 @@ class DiscordPersona {
             let action = this.persona.onMinute(this.client.channels.cache.filter(channel => "messages" in channel).map(channel => "name" in channel ? channel.name : ""));
             if (!action) return;
             if (action.message && action.channel) {
-                this.sendMessage(this.client.channels.cache.filter(channel => "messages" in channel).find(channel => "name" in channel && channel.name == action.channel) ?? null, action.message);
+                let textChannels = this.client.channels.cache.filter(channel => channel.type == Discord.ChannelType.GuildText)
+                let channel = textChannels.find(channel => "name" in channel && channel.name == action.channel) ?? null;
+                this.sendMessage(channel, action.message);
             }
         }, 60 * 1000);
     }

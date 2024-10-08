@@ -3,4 +3,4 @@ services:
     build: .
     restart: always
     volumes:
-      - ${DATA_FOLDER}${DATA_FOLDER:+:}/app/data
+      - ${DATA_DIR:?DATA_DIR env variable is mandatory}:/app/data

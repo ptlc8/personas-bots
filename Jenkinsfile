@@ -2,13 +2,9 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'data_directory', defaultValue: '/srv/personas-bots/data', description: 'Directory where app data are stored (config and personas descriptions)')
+        string(name: 'DATA_DIR', defaultValue: '/srv/personas-bots/data', description: 'Directory where app data are stored (config and personas descriptions)')
     }
 
-    environment {
-        DATA_DIR = "${params.data_directory}"
-    }
-    
     stages {
         stage('Build') {
             steps {
@@ -19,7 +15,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'docker compose run personas-bots npm run check-types'
+                sh 'docker compose run --rm personas-bots npm run check-types'
             }
         }
 

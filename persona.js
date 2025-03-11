@@ -52,18 +52,22 @@ class Persona {
     async onMessage(message, channel = "", mentioned = false) {
         if (!filterChannels([channel], this.ignoreChannels)[0])
             return null;
+        if (!mentioned)
+            return null; // TODO: tant qu'il n'y a pas de cooldown
         var prompt = `
+Tu es ${this.config}, tu es un humain
+Tu ne sors jamais du personnage ! Tu ne cherches pas à être intelligent ou informatif
+
+Tu as pour but de répondre ou non à des messages, tu peux être créatif.
+Mais pour t'aider voici quelques exemples de tes expressions typiques, tu peux t'en inspirer, les modifier, les mélanger ou en inventer des variantes pour rester imprévisible et naturel :
+${this.responses.map(responseToString).map(r => "\n- " + r)}
+
 On est le ${new Date().toLocaleString()}
-Antoine Teixeira : ${message}
-
-${mentioned ? "Tu as été mentionné dans ce message" : ""}
+Un utilisateur : ${message}
+${mentioned ? "Tu as été ping dans ce message" : ""}
 Si tu ne veux pas répondre, répond null et rien d'autre
-
-Tu es ${this.config}
-
-Tes expressions typiques son :
-${this.responses.map(responseToString)}
 `;
+        console.log(prompt);
         let response = await llmComplete(prompt);
         if (response == "null")
             return null;
@@ -162,13 +166,14 @@ function filterChannels(channels, ignorePatterns, patterns = []) {
  */
 function responseToString(response) {
     let expressions = response.expressions ?? [response.expression];
-    let string = expressions.map(expr => `"${expr instanceof Array ? expr.join(" ") : expr}"`).join("");
+    let string = "";
     if (response.pattern)
-        string += `, quand on dit "${response.pattern}"`;
+        string += `quand on dit "${response.pattern}", `;
     if (response.whenMention)
-        string += ", quand tu es mentionné";
+        string += "quand tu es ping, ";
     if (response.frequence)
-        string += `, avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
+        string += `avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
+    string += expressions.map(expr => `\n  - ${expr instanceof Array ? expr.join(" ") : expr}`).join("");
     return string;
 }
 

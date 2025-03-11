@@ -2,11 +2,12 @@ FROM node:lts-slim
 
 WORKDIR /app
 
-COPY ./*.js ./
-COPY ./*.json ./
-
 RUN mkdir -p data/personas
 
+COPY ./package*.json ./
 RUN npm ci
+
+COPY ./*.js ./
+COPY ./*.json ./
 
 CMD ["node", "index.js"]

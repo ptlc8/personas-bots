@@ -57,7 +57,7 @@ class Persona {
         var prompt = `
 Tu es ${this.config}
 
-Voici quelques exemples d'expressions typiques :
+Tu as pour but de répondre ou non à des messages, tu peux être créatif. Mais pour t'aider voici quelques exemples de tes expressions typiques, tu peux t'en servir  ou non, les mélanger, etc :
 ${this.responses.map(responseToString).map(r => "\n- " + r)}
 
 On est le ${new Date().toLocaleString()}

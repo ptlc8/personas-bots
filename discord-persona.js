@@ -6,7 +6,7 @@ const Persona = require("./persona");
  * @property {string} token Discord bot token
  * @property {number?} delay Delay before response
  * @property {number?} typingTime Time to type message
- * 
+ *
  * @typedef {Persona.Config & DiscordConfig} Config
  */
 
@@ -55,7 +55,7 @@ class DiscordPersona {
             // else let persona respond
             var response = this.persona.onMessage(message.content, "name" in message.channel ? message.channel.name : "", message.mentions.users.has(this.client.user?.id ?? "0"));
             if (response) {
-                this.sendMessage(message.channel, response);
+                this.sendMessage(message.channel, response, message);
             }
         });
         this.client.login(token);
@@ -71,10 +71,11 @@ class DiscordPersona {
     }
     /**
      * Send a message in a specific channel with typing
-     * @param {Discord.TextBasedChannel?} channel 
-     * @param {string|String[]} message 
+     * @param {Discord.TextBasedChannel?} channel
+     * @param {string|String[]} message
+     * @param {Discord.Message?} messageToReply
      */
-    async sendMessage(channel, message) {
+    async sendMessage(channel, message, messageToReply = null) {
         if (!channel)
             return;
         if ("guild" in channel && channel.guild.members.me && !channel.permissionsFor(channel.guild.members.me).has([Discord.PermissionFlagsBits.SendMessages, Discord.PermissionFlagsBits.ViewChannel]))
@@ -91,7 +92,16 @@ class DiscordPersona {
             });
         setTimeout(() => {
             channel.sendTyping();
-            setTimeout(() => channel.send(message), randomize(this.typingTime, 30));
+            setTimeout(() => {
+                if (messageToReply && channel.lastMessageId && channel.lastMessageId != messageToReply.id) {
+                    messageToReply.reply({
+                        content: message,
+                        allowedMentions: { repliedUser: false }
+                    })
+                } else {
+                    channel.send(message);
+                }
+            }, randomize(this.typingTime, 30));
         }, randomize(this.delay, 60));
     }
     /**
@@ -113,8 +123,8 @@ class DiscordPersona {
 const emojisCache = {}
 /**
  * Find emote tag with name
- * @param {Discord.Guild} guild 
- * @param {string} emojiName 
+ * @param {Discord.Guild} guild
+ * @param {string} emojiName
  * @returns {Promise<string>}
  */
 function getEmoji(guild, emojiName) {
@@ -136,10 +146,10 @@ function getEmoji(guild, emojiName) {
 /**
  * String.replace function but for async function
  * @see {@link String.replace}
- * @param {string} str 
- * @param {string|RegExp} regex 
- * @param {function(...string):Promise<string>} asyncFn 
- * @returns 
+ * @param {string} str
+ * @param {string|RegExp} regex
+ * @param {function(...string):Promise<string>} asyncFn
+ * @returns {Promise<string>}
  */
 async function replaceAsync(str, regex, asyncFn) {
     /** @type {Promise<?>[]} */

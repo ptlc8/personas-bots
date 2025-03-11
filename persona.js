@@ -52,6 +52,8 @@ class Persona {
     async onMessage(message, channel = "", mentioned = false) {
         if (!filterChannels([channel], this.ignoreChannels)[0])
             return null;
+        if (!mentioned)
+            return null; // TODO: tant qu'il n'y a pas de cooldown
         var prompt = `
 On est le ${new Date().toLocaleString()}
 Antoine Teixeira : ${message}

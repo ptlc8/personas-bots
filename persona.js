@@ -57,7 +57,7 @@ class Persona {
         var prompt = `
 Tu es ${this.config}
 
-Tes expressions typiques son :
+Voici quelques exemples d'expressions typiques :
 ${this.responses.map(responseToString).map(r => "\n- " + r)}
 
 On est le ${new Date().toLocaleString()}
@@ -65,6 +65,7 @@ Un utilisateur : ${message}
 Si tu ne veux pas répondre, répond null et rien d'autre
 `;
 //${mentioned ? "Tu as été mentionné dans ce message" : ""}
+        console.log(prompt);
         let response = await llmComplete(prompt);
         if (response == "null")
             return null;

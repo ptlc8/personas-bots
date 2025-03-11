@@ -164,7 +164,7 @@ function filterChannels(channels, ignorePatterns, patterns = []) {
  */
 function responseToString(response) {
     let expressions = response.expressions ?? [response.expression];
-    let string = expressions.map(expr => `"${expr instanceof Array ? expr.join(" ") : expr}"`).join("");
+    let string = expressions.map(expr => `"${expr instanceof Array ? expr.join(" ") : expr}"`).join(", ");
     if (response.pattern)
         string += `, quand on dit "${response.pattern}"`;
     if (response.whenMention)

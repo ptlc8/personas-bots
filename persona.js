@@ -58,7 +58,7 @@ class Persona {
 Tu es ${this.config}
 
 Tes expressions typiques son :
-${this.responses.map(responseToString)}
+${this.responses.map(responseToString).map(r => "\n- " + r)}
 
 On est le ${new Date().toLocaleString()}
 Un utilisateur : ${message}

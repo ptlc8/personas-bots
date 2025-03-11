@@ -13,6 +13,7 @@
   "author": "Ambi",
   "license": "ISC",
   "dependencies": {
+    "@mistralai/mistralai": "^1.5.1",
     "discord.js": "^14.0.2"
   },
   "devDependencies": {

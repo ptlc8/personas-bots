@@ -25,6 +25,8 @@
  * @property {string[]?} ignoreChannels channels names patterns to ignore
  */
 
+const { llmComplete } = require("./mistral-llm"); 
+
 class Persona {
     /**
      * @param {Config} config
@@ -39,44 +41,51 @@ class Persona {
         /** @type {string[]} */
         this.ignoreChannels = ignoreChannels || [];
     }
+
     /**
      * Inform the persona that a message was received
      * @param {string} message content of the message received
      * @param {string} channel channel name or identifier
      * @param {boolean} mentioned true if the persona was mentioned
-     * @returns {(string|string[])?} response of the persona
+     * @returns {Promise<(string|string[])?>} response of the persona
      */
-    onMessage(message, channel = "", mentioned = false) {
+    async onMessage(message, channel = "", mentioned = false) {
         if (!filterChannels([channel], this.ignoreChannels)[0])
             return null;
-        for (let response of this.responses) {
-            if (response.channels && !response.channels.includes(channel)) continue;
-            if (!(response.whenMention && mentioned) && (Math.random() > (response.frequence || 0))) continue;
-            var match = response.pattern
-                ? message.match(new RegExp(response.pattern, "i"))
-                : [message];
-            if (match) {
-                let expression = response.expressions ? pickRandom(response.expressions) : response.expression ?? [];
-                return expression instanceof Array ? expression.map(e => format(e, match ?? [])) : format(expression, match);
-            }
-        }
-        return null;
+        var prompt = `
+On est le ${new Date().toLocaleString()}
+Antoine Teixeira : ${message}
+
+${mentioned ? "Tu as été mentionné dans ce message" : ""}
+Si tu ne veux pas répondre, répond null et rien d'autre
+
+Tu es ${this.config}
+
+Tes expressions typiques son :
+${this.responses.map(responseToString)}
+`;
+        let response = await llmComplete(prompt);
+        if (response == "null")
+            return null;
+        return response;
     }
+
     /**
      * Inform the persona that a minute has passed
      * @param {string[]} channels list of channels names or identifiers
      * @returns {{message: string | string[], channel: string?}?} message the persona would send
      */
     onMinute(channels) {
-        for (let routine of this.routines) {
+        /*for (let routine of this.routines) { // TODO: temporary disabled
             if (!testBetween(routine.between) || (Math.random() > (routine.frequence || 0))) continue;
             return {
                 message: routine.expressions ? pickRandom(routine.expressions) : routine.expression ?? [],
                 channel: pickRandom(filterChannels(channels, this.ignoreChannels, routine.channels ?? []))
             };
-        }
+        }*/
         return null;
     }
+
     /**
      * Get info about the persona
      * @returns {{expressions: number, frequence: number, config: string, responses: number, routines: number}}
@@ -143,6 +152,24 @@ function filterChannels(channels, ignorePatterns, patterns = []) {
                 return true;
         return false;
     });
+}
+
+/**
+ * Retourne une version naturellement lisible d'une réponse
+ * Pour une utilisation dans un prompt
+ * @param {Response} response
+ * @returns {string}
+ */
+function responseToString(response) {
+    let expressions = response.expressions ?? [response.expression];
+    let string = expressions.map(expr => `"${expr instanceof Array ? expr.join(" ") : expr}"`).join("");
+    if (response.pattern)
+        string += `, quand on dit "${response.pattern}"`;
+    if (response.whenMention)
+        string += ", quand tu es mentionné";
+    if (response.frequence)
+        string += `, avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
+    return string;
 }
 
 module.exports = Persona;

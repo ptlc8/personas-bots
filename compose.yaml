@@ -1,6 +1,8 @@
 services:
   personas-bots:
     build: .
+    environment:
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY?}
     restart: always
     volumes:
       - ${DATA_DIR:?DATA_DIR env variable is mandatory}:/app/data

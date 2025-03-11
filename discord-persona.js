@@ -53,14 +53,14 @@ class DiscordPersona {
                 }
             }
             // else let persona respond
-            var response = this.persona.onMessage(message.content, "name" in message.channel ? message.channel.name : "", message.mentions.users.has(this.client.user?.id ?? "0"));
+            var response = await this.persona.onMessage(message.content, "name" in message.channel ? message.channel.name : "", message.mentions.users.has(this.client.user?.id ?? "0"));
             if (response) {
                 this.sendMessage(message.channel, response, message);
             }
         });
         this.client.login(token);
         setInterval(() => {
-            let action = this.persona.onMinute(this.client.channels.cache.filter(channel => "messages" in channel).map(channel => "name" in channel ? channel.name : ""));
+            let action = this.persona.onMinute(this.client.channels.cache.filter(channel => "messages" in channel).map(channel => "name" in channel ? channel.name ?? "" : ""));
             if (!action) return;
             if (action.message && action.channel) {
                 let textChannels = this.client.channels.cache.filter(channel => channel.type == Discord.ChannelType.GuildText)
@@ -91,14 +91,15 @@ class DiscordPersona {
                 return await getEmoji(channel.guild, emojiName);
             });
         setTimeout(() => {
-            channel.sendTyping();
+            if ("sendTyping" in channel)
+                channel.sendTyping();
             setTimeout(() => {
-                if (messageToReply && channel.lastMessageId && channel.lastMessageId != messageToReply.id) {
+                if (messageToReply && "lastMessageId" in channel && channel.lastMessageId != messageToReply.id) {
                     messageToReply.reply({
                         content: message,
                         allowedMentions: { repliedUser: false }
                     })
-                } else {
+                } else if ("send" in channel) {
                     channel.send(message);
                 }
             }, randomize(this.typingTime, 30));

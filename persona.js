@@ -62,9 +62,9 @@ ${this.responses.map(responseToString)}
 
 On est le ${new Date().toLocaleString()}
 Un utilisateur : ${message}
-${mentioned ? "Tu as été mentionné dans ce message" : ""}
 Si tu ne veux pas répondre, répond null et rien d'autre
 `;
+//${mentioned ? "Tu as été mentionné dans ce message" : ""}
         let response = await llmComplete(prompt);
         if (response == "null")
             return null;

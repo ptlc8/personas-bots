@@ -55,16 +55,15 @@ class Persona {
         if (!mentioned)
             return null; // TODO: tant qu'il n'y a pas de cooldown
         var prompt = `
-On est le ${new Date().toLocaleString()}
-Antoine Teixeira : ${message}
-
-${mentioned ? "Tu as été mentionné dans ce message" : ""}
-Si tu ne veux pas répondre, répond null et rien d'autre
-
 Tu es ${this.config}
 
 Tes expressions typiques son :
 ${this.responses.map(responseToString)}
+
+On est le ${new Date().toLocaleString()}
+Un utilisateur : ${message}
+${mentioned ? "Tu as été mentionné dans ce message" : ""}
+Si tu ne veux pas répondre, répond null et rien d'autre
 `;
         let response = await llmComplete(prompt);
         if (response == "null")

@@ -62,9 +62,9 @@ ${this.responses.map(responseToString).map(r => "\n- " + r)}
 
 On est le ${new Date().toLocaleString()}
 Un utilisateur : ${message}
+${mentioned ? "Tu as été ping dans ce message" : ""}
 Si tu ne veux pas répondre, répond null et rien d'autre
 `;
-//${mentioned ? "Tu as été mentionné dans ce message" : ""}
         console.log(prompt);
         let response = await llmComplete(prompt);
         if (response == "null")
@@ -164,13 +164,14 @@ function filterChannels(channels, ignorePatterns, patterns = []) {
  */
 function responseToString(response) {
     let expressions = response.expressions ?? [response.expression];
-    let string = expressions.map(expr => `"${expr instanceof Array ? expr.join(" ") : expr}"`).join(", ");
+    let string = "";
     if (response.pattern)
-        string += `, quand on dit "${response.pattern}"`;
+        string += `quand on dit "${response.pattern}", `;
     if (response.whenMention)
-        string += ", quand tu es mentionné";
+        string += "quand tu es ping, ";
     if (response.frequence)
-        string += `, avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
+        string += `avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
+    let string += expressions.map(expr => `\n  - ${expr instanceof Array ? expr.join(" ") : expr}`).join("");
     return string;
 }
 

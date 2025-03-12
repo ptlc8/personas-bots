@@ -171,7 +171,7 @@ function responseToString(response) {
         string += "quand tu es ping, ";
     if (response.frequence)
         string += `avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
-    let string += expressions.map(expr => `\n  - ${expr instanceof Array ? expr.join(" ") : expr}`).join("");
+    string += expressions.map(expr => `\n  - ${expr instanceof Array ? expr.join(" ") : expr}`).join("");
     return string;
 }
 

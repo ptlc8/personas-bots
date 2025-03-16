@@ -20,11 +20,11 @@ class DiscordPersona {
      * @param {Config} config Also containing Persona parameters
      * @see {@link Persona} Persona
      */
-    constructor({ token, config, responses, routines, delay, typingTime, ignoreChannels }) {
+    constructor({ token, config, names, responses, routines, delay, typingTime, ignoreChannels }) {
         /** @type {string} */
         this.config = config;
         /** @type {Persona} */
-        this.persona = new Persona({ config, responses, routines, ignoreChannels });
+        this.persona = new Persona({ config, names, responses, routines, ignoreChannels });
         /** @type {number} */
         this.delay = delay || 0;
         /** @type {number} */
@@ -40,6 +40,11 @@ class DiscordPersona {
         });
         this.client.on("ready", () => {
             console.info(`[${this.config}] Logged in Discord as ${this.client.user?.tag}`);
+            if (this.client.user) {
+                this.persona.names.push(this.client.user.username);
+                this.persona.names.push(this.client.user.tag);
+                this.persona.names.push(`<@${this.client.user.id}>`);
+            }
         });
         this.client.on("messageCreate", async message => {
             // if it's its message ignore
@@ -53,7 +58,8 @@ class DiscordPersona {
                 }
             }
             // else let persona respond
-            var response = await this.persona.onMessage(message.content, "name" in message.channel ? message.channel.name : "", message.mentions.users.has(this.client.user?.id ?? "0"));
+            let sender = message.author.username;
+            var response = await this.persona.onMessage(message.content, sender, "name" in message.channel ? message.channel.name : "", message.mentions.users.has(this.client.user?.id ?? "0"));
             if (response) {
                 this.sendMessage(message.channel, response, message);
             }

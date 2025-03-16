@@ -20,6 +20,7 @@
 /**
  * @typedef Config
  * @property {string} config configuration name
+ * @property {string[]?} names possible names
  * @property {Response[]?} responses possible responses
  * @property {Routine[]?} routines possible routines
  * @property {string[]?} ignoreChannels channels names patterns to ignore
@@ -31,9 +32,11 @@ class Persona {
     /**
      * @param {Config} config
      */
-    constructor({ config, responses, routines, ignoreChannels }) {
+    constructor({ config, names, responses, routines, ignoreChannels }) {
         /** @type {string} */
         this.config = config;
+        /** @type {string[]} */
+        this.names = names || [];
         /** @type {Response[]} */
         this.responses = responses || [];
         /** @type {Routine[]} */
@@ -45,31 +48,33 @@ class Persona {
     /**
      * Inform the persona that a message was received
      * @param {string} message content of the message received
+     * @param {string?} sender sender name
      * @param {string} channel channel name or identifier
      * @param {boolean} mentioned true if the persona was mentioned
      * @returns {Promise<(string|string[])?>} response of the persona
      */
-    async onMessage(message, channel = "", mentioned = false) {
+    async onMessage(message, sender, channel = "", mentioned = false) {
         if (!filterChannels([channel], this.ignoreChannels)[0])
             return null;
-        if (!mentioned)
-            return null; // TODO: tant qu'il n'y a pas de cooldown
         var prompt = `
-Tu es ${this.config}, tu es un humain
+Tu es un humain, on t'apelle ${this.names.join(" ou ")}
 Tu ne sors jamais du personnage ! Tu ne cherches pas à être intelligent ou informatif
 
 Tu as pour but de répondre ou non à des messages, tu peux être créatif.
 Mais pour t'aider voici quelques exemples de tes expressions typiques, tu peux t'en inspirer, les modifier, les mélanger ou en inventer des variantes pour rester imprévisible et naturel :
 ${this.responses.map(responseToString).map(r => "\n- " + r)}
 
+Surprend l'utilisateur avec une réponse intéressante
+N'utilise pas que ton vocabulaire, utilise aussi des mots normaux, tu restes un humain normal
+
 On est le ${new Date().toLocaleString()}
-Un utilisateur : ${message}
-${mentioned ? "Tu as été ping dans ce message" : ""}
+${sender ?? "Un utilisateur"} : ${message}
+${mentioned ? "Tu as été ping dans ce message" : "Tu n'as pas été ping dans ce message mais tu peux répondre quand même"}
 Si tu ne veux pas répondre, répond null et rien d'autre
 `;
         console.log(prompt);
         let response = await llmComplete(prompt);
-        if (response == "null")
+        if ((response instanceof Array ? response[0] : response)?.toLowerCase() == "null")
             return null;
         return response;
     }
@@ -170,9 +175,9 @@ function responseToString(response) {
     if (response.pattern)
         string += `quand on dit "${response.pattern}", `;
     if (response.whenMention)
-        string += "quand tu es ping, ";
-    if (response.frequence)
-        string += `avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
+        string += "quand tu es ping";
+    //if (response.frequence)
+    //    string += `avec une fréquence de ${response.frequence * 60 * 24} fois par jour`;
     string += expressions.map(expr => `\n  - ${expr instanceof Array ? expr.join(" ") : expr}`).join("");
     return string;
 }

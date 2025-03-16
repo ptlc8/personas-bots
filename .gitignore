@@ -1,3 +1,4 @@
 node_modules
 data/personas/*.json
 data/config.json
+.env
